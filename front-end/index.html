@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Incident Explainer</title>
+  <style>
+    body { font-family: Arial; background:#0f172a; color:#e5e7eb; padding:30px }
+    table { border-collapse: collapse; width:100% }
+    th, td { padding:10px; border:1px solid #334155 }
+    th { background:#1e293b }
+    button { padding:10px 20px; background:#38bdf8; border:none; cursor:pointer }
+  </style>
+</head>
+<body>
+
+<h2>Serverless Cloud Incident Explainer</h2>
+<button onclick="loadData()">Load Incidents</button>
+
+<table id="tbl">
+<tr><th>ID</th><th>Service</th><th>Severity</th><th>Cause</th><th>Status</th><th>Time</th></tr>
+</table>
+
+<script>
+const API = "https://16u0bfglt9.execute-api.us-east-1.amazonaws.com/incidents";
+
+async function loadData(){
+  console.log("Fetching:", API);
+
+  try {
+    const res = await fetch(API);
+    console.log("Status:", res.status);
+
+    const text = await res.text();
+    console.log("RAW TEXT:", text);
+
+    const data = JSON.parse(text);
+    console.log("PARSED:", data);
+
+    const rows = Array.isArray(data) ? data : data.Items;
+
+    const t = document.getElementById("tbl");
+    while(t.rows.length > 1) t.deleteRow(1);
+
+    rows.forEach(i=>{
+      let r=t.insertRow();
+      r.insertCell(0).innerText=i.incident_id;
+      r.insertCell(1).innerText=i.service;
+      r.insertCell(2).innerText=i.severity;
+      r.insertCell(3).innerText=i.root_cause;
+      r.insertCell(4).innerText=i.status;
+      r.insertCell(5).innerText=i.timestamp;
+    });
+  }
+  catch(err){
+    console.error("FETCH FAILED:", err);
+  }
+}
+</script>
+
+
+</body>
+</html>
